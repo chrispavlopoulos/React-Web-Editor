@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "immutable": "^4.0.0-rc.12",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1"
+    "react-native-expo-viewport-units": "0.0.8",
+    "react-scripts": "3.0.1",
+    "slate": "^0.47.4",
+    "slate-react": "^0.22.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -27,5 +31,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "react-redux": "^7.1.0",
+    "redux": "^4.0.1",
+    "redux-saga": "^1.0.3",
+    "uuid": "^3.3.2"
   }
 }
