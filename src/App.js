@@ -56,8 +56,11 @@ class App extends Component {
     return null;
   }
 
-  componentDidUpdate(){
+  componentDidMount(){
+    this.selectedAsset = React.createRef();
+  }
 
+  componentDidUpdate(){
     //  For showing the highlight box
     this.updateHighlightBoxDimens();
   }
@@ -71,13 +74,14 @@ class App extends Component {
     else
       target = this.state.dragTarget;
 
+    target = this.selectedAsset.current;
+
     if(target){
       var margin = 10;
-      var rect = target.getBoundingClientRect();
-      left = target.offsetLeft - margin /2;
-      top = target.offsetTop - margin /2;
-      width = target.offsetWidth + margin;
-      height = target.offsetHeight + margin;
+      left = target.getLeft() - margin /2;
+      top = target.getTop() - margin /2;
+      width = target.getWidth() + margin;
+      height = target.getHeight() + margin;
 
       if(this.state.highlightLeft != left || this.state.highlightTop != top ||
         this.state.highlightWidth != width || this.state.highlightHeight != height)
@@ -182,7 +186,13 @@ class App extends Component {
     //  For dragging and scaling
     var {dragStartX, dragStartY} = this.state;
     if(this.state.dragging){
-      var target = this.state.dragTarget;
+      var target = document.getElementById(this.state.dragTarget);
+      if(!target)
+        return;
+
+      var child = document.getElementById(target.id + "AssetGroup");
+
+
       if(!target) return;
 
 
@@ -212,6 +222,9 @@ class App extends Component {
         target.style.top = newY - (targetH / 2)+ "px";
       }else{
         // Scaling
+
+        if(child)
+          target = child;
 
         var {startW, startH, scaleEndX, scaleEndY} = this.state;
 
@@ -256,7 +269,12 @@ class App extends Component {
 
     if(this.props.penType !== PEN_TYPE.EDIT) return;
 
-    const target = document.elementFromPoint(e.pageX, e.pageY);
+    var target = document.elementFromPoint(e.pageX, e.pageY);
+
+    if(target && target.id && target.id.includes("AssetGroup")){
+      target = document.getElementById(target.id.replace("AssetGroup", ''));
+    }
+
     if(!target || !target.dataset || !target.dataset.edit) return;
 
     var history = this.state.history;
@@ -274,7 +292,7 @@ class App extends Component {
 
     target.style.cursor = "default";
     target.draggable = false
-    this.setState({dragTarget: target, dragging: true, dragStartX: null, dragStartY: null});
+    this.setState({dragTarget: target.id, dragging: true, dragStartX: null, dragStartY: null});
   }
 
   onMouseUp = (e) =>{
@@ -398,7 +416,7 @@ class App extends Component {
         {spinny}
         <Pen />
         <AssetDrawer />
-        <EditorWindow />
+        <EditorWindow editorTargetRef={this.selectedAsset}/>
 
         <div>
           {assets.map(asset => (
@@ -415,87 +433,11 @@ class App extends Component {
     )
   };
 
-  /*
-  <div data-edit="true" style={{position: 'absolute', top: 500}}>
-    <Form />
-  </div>
-  <div className="col-md-4 offset-md-1" data-edit="true" style={{position: 'absolute', top: 600}}>
-    <List />
-  </div>
-  */
-
   renderAsset = (description) =>{
-    return <EditableComponent description={description} />
-
-
-    // let asset;
-    // switch (description.type){
-    //   case ASSET_TYPE.TEXT:
-    //     asset =
-    //     <p
-    //       id={description.id} key={description.id}
-    //       data-type={description.type} data-edit="true"
-    //       style={{...description.style, margin: 0, fontSize: "4vmin", position: "absolute", left: description.left, top: description.top}}>{description.content}
-    //     </p>;
-    //     break;
-    //   case ASSET_TYPE.IMAGE:
-    //     asset =
-    //     <img
-    //       id={description.id} key={description.id}
-    //       data-type={description.type} data-edit="true"
-    //       src={description.content}
-    //       style={{ ...description.style, position: "absolute", margin: 0, left: description.left, top: description.top}}
-    //     />;
-    //     break;
-    //   case ASSET_TYPE.VIDEO:
-    //   asset =
-    //     <div id={description.id + "parent"} key={description.id + "parent"}
-    //       data-type={description.type} data-edit="true"
-    //       style={{
-    //         width: "30vmin", height: "26vmin",
-    //         display: "flex", alignItems: "center", justifyContent: "center",
-    //         position: "absolute",
-    //         backgroundColor: "transparent",
-    //         left: description.left, top: description.top}}>
-    //       <iframe
-    //         id={description.id} key={description.id}
-    //         data-type={description.type}
-    //         src={description.content}
-    //         style={{margin: 0, padding: 0, border: "1px solid white", width: "80%", height: "60%", pointerEvents: this.props.penType === PEN_TYPE.EDIT? "none": "all", }}
-    //       />
-    //     </div>
-    //   break;
-    //   case ASSET_TYPE.INPUT:
-    //   asset =
-    //     <div id={description.id + "parent"} key={description.id + "parent"}
-    //       data-type={description.type} data-edit="true"
-    //       style={{
-    //         padding: "4vmin",
-    //         display: "flex", alignItems: "center", justifyContent: "center",
-    //         position: "absolute",
-    //         backgroundColor: "transparent",
-    //         left: description.left, top: description.top}}>
-    //
-    //         <MaterialInput description={description}/>
-    //       {/*
-    //       <form
-    //         data-type={description.type}
-    //         style={{margin: 0, padding: 0, pointerEvents: this.props.penType === PEN_TYPE.EDIT? "none": "all", }}>
-    //           <input
-    //           type="text"
-    //           id={description.id}
-    //           key={description.id}
-    //           data-type={description.type}
-    //           name="fname"
-    //           style={{margin: "8px 0", padding: "10px 10px", color: "black", borderRadius: "10px", backgroundColor: "transparent", width: "12vmin", height: "2vmin"}} />
-    //       </form>
-    //       */}
-    //     </div>
-    //   break;
-    // }
-    // asset.props.style.zIndex = 1;
-    //
-    // return asset;
+    if( (this.state.dragTarget === description.id) || (this.props.editorTarget && this.props.editorTarget === description.id) )
+      return <EditableComponent ref={this.selectedAsset} description={description} />
+    else
+      return <EditableComponent description={description} />
   }
 
   drawHighlightBox = () =>{

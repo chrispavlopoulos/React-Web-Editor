@@ -150,7 +150,7 @@ class ConnectedEditorWindow extends Component{
       var target = document.getElementById(targetId);
       if(target){
 
-        this.attachToTarget(target); // flicker happens before this
+        this.attachToTarget(target);
         this.alignWindowTo(target);
       }
     }else{
@@ -319,7 +319,7 @@ class ConnectedEditorWindow extends Component{
           position: "absolute",
           backgroundColor: "#f8f8ff",
           zIndex: 101,
-          width: open? "60vw": 0, height: open? "15vmin": 0,
+          width: open? "100%": 0, height: open? "15vmin": 0,
           maxWidth: "40em",
           marginTop: "5vmin",
           display: "flex",
@@ -412,7 +412,10 @@ class ConnectedEditorWindow extends Component{
     )
   }
 
-  alignWindowTo = (target) =>{ // flicker happens before this
+  alignWindowTo = () =>{
+    var target = this.props.editorTargetRef.current;
+    if(!target) return;
+
     var screenWidth, screenHeight, editorWidth, editorHeight, left, top, projectedWidth, projectedHeight, pointerOffsetLeft, pointerOffsetTop, pointerRotation;
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
@@ -420,14 +423,14 @@ class ConnectedEditorWindow extends Component{
     pointerOffsetLeft = pointerOffsetTop = 0;
     pointerRotation = "0deg";
 
-    left = target.offsetLeft + target.offsetWidth / 2;
-    top = target.offsetTop + target.offsetHeight + vmax(2);
+    left = target.getLeft() + target.getWidth() / 2;
+    top = target.getTop() + target.getHeight() + vmax(2);
 
     projectedHeight = top + editorWindowHeight
     if(projectedHeight + DEFAULT_MARGIN > screenHeight){
       pointerRotation = "180deg";
       pointerOffsetTop = editorWindowHeight;// + vmax(2);
-      top = target.offsetTop - editorWindowHeight - vmax(2);
+      top = target.getTop() - editorWindowHeight - vmax(2);
     }
 
     projectedWidth = left + editorWindowWidth;
@@ -441,8 +444,7 @@ class ConnectedEditorWindow extends Component{
     }
 
     if(this.state.left !== left || this.state.top !== top ||
-      this.state.pointerOffsetLeft !== pointerOffsetLeft || this.state.pointerOffsetTop !== pointerOffsetTop ||
-      this.state.pointerRotation !== pointerRotation)
+      this.state.pointerOffsetLeft !== pointerOffsetLeft || this.state.pointerOffsetTop !== pointerOffsetTop)
       this.setState({left: left, top: top, pointerOffsetLeft: pointerOffsetLeft, pointerOffsetTop: pointerOffsetTop, pointerRotation: pointerRotation});
   }
 
@@ -450,6 +452,8 @@ class ConnectedEditorWindow extends Component{
   attachToTarget = (target) =>{
     if(target.id.includes("parent"))
       target = document.getElementById(target.id.replace("parent",''));
+
+    var targetRef = this.props.editorTargetRef.current;
 
     if(!target){
       console.log("ERROR", "Null target in attachToTarget");
@@ -488,7 +492,7 @@ class ConnectedEditorWindow extends Component{
         });
       }, 200);
 
-      var targetData = target.getPropertyValue(this.props.editorSelectedProperty);//this.getPropertyValueForTarget(target, this.props.editorSelectedProperty);
+      var targetData = targetRef.getPropertyValue(this.props.editorSelectedProperty);
 
       if(!targetData){
         console.log("Invalid targetData, setting data to empty string");
@@ -522,7 +526,7 @@ class ConnectedEditorWindow extends Component{
       if(text === lastKnownText) return;
       lastKnownText = text;
 
-      this.setPropertyValueForTarget(target, this.props.editorSelectedProperty, text);
+      targetRef.setPropertyValue(this.props.editorSelectedProperty, Typ.complicate(text, this.props.editorSelectedProperty.css));
     }
 
   }

@@ -89,8 +89,9 @@ class DataHelper{
       break;
       case ASSET_TYPE.INPUT:
         return [
-          new AssetProperty("placeholder", "Hint", false),
-          new AssetProperty("value", "Default Text", false),
+          new AssetProperty("textContent", "Title", false).setUniqueId("title"),
+          new AssetProperty("titleColor", "Title Color", false),
+          new AssetProperty("secondaryColor", "Secondary Color", false),
           new AssetProperty("width", "Width"),
           new AssetProperty("height", "Height"),
           new AssetProperty("transform", "Scale").setPrefix("scale(").setPostfix(")"),

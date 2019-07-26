@@ -9,7 +9,8 @@
     "react-native-expo-viewport-units": "0.0.8",
     "react-scripts": "3.0.1",
     "slate": "^0.47.4",
-    "slate-react": "^0.22.4"
+    "slate-react": "^0.22.4",
+    "styled-components": "^4.3.2"
   },
   "scripts": {
     "start": "react-scripts start",
