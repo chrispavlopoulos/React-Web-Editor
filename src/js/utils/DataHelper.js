@@ -1,5 +1,6 @@
-import { ACTION } from "../actions"
 import { PEN_TYPE, ASSET_TYPE, } from "../constants.js";
+
+var assetCount = 0;
 
 class DataHelper{
   static initPens = () =>{
@@ -31,20 +32,24 @@ class DataHelper{
   static packageAsset = (assetDOM, id) =>{
     var packagedStyles = this.packageStyles(assetDOM.style.cssText);
     var assetRect = assetDOM.getBoundingClientRect();
-    return {type: assetDOM.dataset.type, id: id, content: assetDOM.dataset.content, left: assetRect.left, top: assetRect.top, style: packagedStyles};
+    return {type: assetDOM.dataset.type, id: this.getUniqueAssetId(id), content: assetDOM.dataset.content, left: assetRect.left, top: assetRect.top, style: packagedStyles};
   }
 
   static packageStyles = (cssText) =>{
     cssText = cssText.replace(/ /g, '');
     const cssArray = cssText.split(';');
     var style = {};
-    var cur, split, name, val;
+    var cur, split;
     for(var i = 0; i < cssArray.length; i++){
-      cur = cssArray[i].replace(/\;/g, '');
+      cur = cssArray[i].replace(/;/g, '');
       split = cur.split(':');
       style[split[0]] = split[1];
     }
     return style;
+  }
+
+  static getUniqueAssetId = (genericId) =>{
+    return genericId + assetCount++;
   }
 
   static getPropertiesFor = (type) =>{
@@ -62,7 +67,7 @@ class DataHelper{
           new AssetProperty("textShadow", "Shadow"),
           new AssetProperty("zIndex", "Z Index"),
         ];
-      break;
+
       case ASSET_TYPE.IMAGE:
         return [
           new AssetProperty("src", "URL", false).setUniqueId('src'),
@@ -75,7 +80,7 @@ class DataHelper{
           new AssetProperty("filter", "Filter"),
           new AssetProperty("zIndex", "Z Index"),
         ];
-      break;
+
       case ASSET_TYPE.VIDEO:
         return [
           new AssetProperty("src", "Src", false),
@@ -86,22 +91,25 @@ class DataHelper{
           new AssetProperty("filter", "Filter"),
           new AssetProperty("zIndex", "Z Index"),
         ];
-      break;
+
       case ASSET_TYPE.INPUT:
         return [
+          new AssetProperty("type", "Type").setUniqueId("inputtype"),
           new AssetProperty("textContent", "Title", false).setUniqueId("title"),
-          new AssetProperty("titleColor", "Title Color", false),
-          new AssetProperty("secondaryColor", "Secondary Color", false),
+          new AssetProperty("titleColor", "Title Color"),
+          new AssetProperty("inputColor", "Input Color"),
+          new AssetProperty("secondaryColor", "Secondary Color"),
+          new AssetProperty("backgroundColor", "Background Color"),
           new AssetProperty("width", "Width"),
           new AssetProperty("height", "Height"),
           new AssetProperty("transform", "Scale").setPrefix("scale(").setPostfix(")"),
           new AssetProperty("transform", "Rotation").setPrefix("rotate(").setPostfix("deg)"),
           new AssetProperty("zIndex", "Z Index"),
         ];
-      break;
+      
       default:
         return [ new AssetProperty("default", "default", false) ];
-      break;
+      
     }
   }
 }

@@ -4,18 +4,22 @@ import { connect } from "react-redux";
 import { setEditorSelectedProperty } from "../actions/index.js";
 import { COLORS } from "../constants.js";
 import styled from 'styled-components'
+import '../../InputBox.css';
 
 const CoolInput = styled.input`
-  color: green;
+  color: ${props => props.inputColor || (props.backgroundColor && "black") || "white"};
+  background: ${props => props.backgroundColor || "transparent"};
   font-size:18px;
   padding:10px 10px 10px 5px;
   display:block;
-  width:300px;
   border:none;
   border-radius: 2px;
-  border-bottom:1px solid #757575;
-
+  transition:0.2s ease border-bottom;
 `;
+
+//  width: ${props => props.width || "300px"};
+
+
 const CoolLabel = styled.label`
   color:#999;
   font-size:18px;
@@ -29,34 +33,49 @@ const CoolLabel = styled.label`
   -webkit-transition:0.2s ease-out all;
 `;
 
-const HighlightBar = styled.span`
+const HighlightBarIn = styled.span`
   height:2px;
   width:0;
-  bottom:1px;
+  bottom:0px;
   position:absolute;
-  width:0px;
+  width:0%;
   background-color: ${props => props.color || "#5264AE"};
   transition:0.2s ease all;
-  -moz-transition:0.2s ease all;
-  -webkit-transition:0.2s ease all;
+`;
+
+const HighlightBarOut = styled.span`
+  height:2px;
+  width:0;
+  bottom:0px;
+  right:0px;
+  position:absolute;
+  width:100%;
+  background-color: ${props => props.color || "white"};
+  transition:0.2s ease all;
 `;
 
 const Wrapper = styled.div`
   position:relative;
+  width: 300px;
 
   & ${CoolInput}:hover ~ ${CoolLabel}{
     opacity: 0.5;
   }
 
-  & ${CoolInput}:focus ~ ${CoolLabel}{
+  & ${CoolInput}:focus ~ ${CoolLabel},
+  & ${CoolInput}:valid ~ ${CoolLabel}{
     top:-20px;
     font-size:14px;
     color: ${props => props.titleColor || "#5264AE"};
     opacity: 1.0;
   }
 
-  & ${CoolInput}:focus ~ ${HighlightBar}{
-    width: 300px;
+  & ${CoolInput}:focus ~ ${HighlightBarIn}{
+    width: ${props => (props.secondaryColor === "transparent" && "0%") || (props.secondaryColor && "100%") || "100%"};
+  }
+
+  & ${CoolInput}:focus ~ ${HighlightBarOut}{
+    width: ${props => (props.secondaryColor === "transparent" && "100%") || (props.secondaryColor && "0%") || "0%"};
   }
 
 `;
@@ -68,11 +87,17 @@ class MaterialInput extends Component{
     suggestions: [],
     selectedProperty: null,
     titleColor: "#5264AE",
+    inputColor: null,
+    underlineColor: null,
     secondaryColor: null,
+    backgroundColor: null,
+    width: "100%",
+    type: "text",
   }
 
   constructor(props) {
     super(props);
+    this.wrapper = React.createRef();
     this.input = React.createRef();
     this.label = React.createRef();
   }
@@ -89,13 +114,15 @@ class MaterialInput extends Component{
     var { description } = this.props;
 
     return (
-      <Wrapper titleColor={this.state.titleColor}>
-        <CoolInput
-          id="input"
-          ref={this.input}
-          type="text" required />
-        <HighlightBar color={this.state.secondaryColor} />
-        <CoolLabel ref={this.label}>Email</CoolLabel>
+      <Wrapper ref={ this.wrapper } titleColor={ this.state.titleColor } secondaryColor={ this.state.secondaryColor }>
+        <CoolInput id="input" ref={ this.input }
+          type={ this.state.type } required
+          inputColor={ this.state.inputColor }
+          backgroundColor={ this.state.backgroundColor }
+          width={ this.state.width }/>
+          <HighlightBarIn color={ this.state.secondaryColor } />
+          <HighlightBarOut color={ this.state.underlineColor } />
+        <CoolLabel ref={ this.label }>Email</CoolLabel>
       </Wrapper>
     )
   }
@@ -112,15 +139,32 @@ class MaterialInput extends Component{
     }
     else{
       switch(property.uniqueId.toUpperCase()){
+        case "INPUTTYPE":
+          value = this.state.type;
+          return;
         case "TITLE":
           target = this.label.current;
-          break;
+          return;
         case "TITLECOLOR":
-          return this.state.titleColor;
+          value = this.state.titleColor;
+          return;
+        case "INPUTCOLOR":
+          value = this.state.inputColor;
+          return;
+        case "UNDERLINECOLOR":
+          value = this.state.underlineColor;
+          return;
         case "SECONDARYCOLOR":
-          return this.state.secondaryColor;
+          value = this.state.secondaryColor;
+          return;
+        case "BACKGROUNDCOLOR":
+          value = this.state.backgroundColor;
+          return;
+        default:
+          target = this.wrapper.current;
+
       }
-      if(!target) return;
+      if(!target) return value;
 
       if(property.isStyle)
         value = target.style[css];
@@ -148,8 +192,11 @@ class MaterialInput extends Component{
       this.label.textContent = newValue;
     }
     else{
-
       switch(property.uniqueId.toUpperCase()){
+        case "INPUTTYPE":
+          if(this.state.type !== newValue)
+            this.setState({type: newValue});
+          return;
         case "TITLE":
           target = this.label.current;
           break;
@@ -157,9 +204,26 @@ class MaterialInput extends Component{
           if(this.state.titleColor !== newValue)
             this.setState({titleColor: newValue});
           return;
+        case "INPUTCOLOR":
+          if(this.state.inputColor !== newValue)
+            this.setState({inputColor: newValue});
+          return;
+        case "UNDERLINECOLOR":
+          if(this.state.underlineColor !== newValue)
+            this.setState({underlineColor: newValue});
+          return;
         case "SECONDARYCOLOR":
           if(this.state.secondaryColor !== newValue)
             this.setState({secondaryColor: newValue});
+          return;
+        case "BACKGROUNDCOLOR":
+          if(this.state.backgroundColor !== newValue)
+            this.setState({backgroundColor: newValue});
+          return;
+
+        default:
+          target = this.wrapper.current;
+
       }
       if(!target) return;
 

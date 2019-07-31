@@ -71,7 +71,7 @@ class Typ{
 
     switch (css.toLowerCase()){
       case "color":
-        if(input === 'none' || input === 'no')
+        if(input === 'none' || input === 'no' || input === 'null')
           input = 'transparent';
         return input;
         break;
@@ -169,6 +169,9 @@ class Typ{
         return "dimen";
       case "color":
       case "backgroundcolor":
+      case "titlecolor":
+      case "primarycolor":
+      case "secondarycolor":
         return "color";
         break;
       case "text":
@@ -234,6 +237,8 @@ class Typ{
         return ['italic', 'oblique 10deg', 'oblique 20deg'];
       case "fontweight":
         return ['bold', '100', '300','500', '900'];
+      case "inputtype":
+        return ['text', 'password', 'time'];
       default:
         return "none";
         break;

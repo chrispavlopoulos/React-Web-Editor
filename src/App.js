@@ -8,12 +8,11 @@ import Pen from "./js/components/Pen.jsx";
 import AssetDrawer from "./js/components/AssetDrawer.jsx";
 import EditorWindow from "./js/components/EditorWindow.jsx";
 import './App.css';
-import './InputBox.css';
 import logo from './logo.svg';
 import {COLORS, PEN_TYPE, ASSET_TYPE} from "./js/constants.js";
 import { setEditorTarget } from './js/actions/index.js';
 
-let mouseDownInsideEditor = false;
+let mouseDownInsideEditor = false, draggedSomething = false;
 
 function mapStateToProps(state){
   return{
@@ -39,8 +38,7 @@ class App extends Component {
     dragging: false,
     x: 0,
     y: 0,
-    dragStartX: null,
-    dragStartY: null,
+    dragStart: null, //{startX: , startY: , absoluteX: , absoluteY: }
     startW: null,
     startH: null,
     scaleEndX: null,
@@ -184,9 +182,16 @@ class App extends Component {
     this.setState({x: x, y: y});
 
     //  For dragging and scaling
-    var {dragStartX, dragStartY} = this.state;
+    var startX, startY, absoluteStartX, absoluteStartY;
+    if(this.state.dragStart){
+      startX = this.state.dragStart.startX;
+      startY = this.state.dragStart.startY;
+      absoluteStartX = this.state.dragStart.absoluteX;
+      absoluteStartY = this.state.dragStart.absoluteY;
+    }
     if(this.state.dragging){
       var target = document.getElementById(this.state.dragTarget);
+      var targetRef = this.selectedAsset.current;
       if(!target)
         return;
 
@@ -201,22 +206,28 @@ class App extends Component {
 
         const targetW = target.offsetWidth;
         const targetH = target.offsetHeight;
-        if(dragStartX == null || dragStartY == null){
-          dragStartX = dragStartY = 0;
-          dragStartX = e.pageX - target.offsetLeft;
-          dragStartY = e.pageY - target.offsetTop;
+        if(startX == null || startY == null){
+          startX = startY = 0;
+          startX = e.pageX - target.offsetLeft;
+          startY = e.pageY - target.offsetTop;
 
-          dragStartX -= (targetW / 2);
-          dragStartY -= (targetH / 2);
-          this.setState({dragStartX: dragStartX, dragStartY: dragStartY});
+          startX -= (targetW / 2);
+          startY -= (targetH / 2);
+          this.setState({dragStart: {startX: startX, startY: startY, absoluteX: e.pageX, absoluteY: e.pageY}} );
 
           return;
         }
 
+
         var newX, newY;
-        newX = e.pageX - this.state.dragStartX;
-        newY = e.pageY - this.state.dragStartY;
+        newX = e.pageX - startX;
+        newY = e.pageY - startY;
         //if(newX + (targetW / 2) > window.innerWidth || newY + (targetH / 2) > window.innerHeight) return;
+
+        var dif = Math.abs(e.pageX - absoluteStartX) + Math.abs(e.pageY - absoluteStartY);
+        if(dif < 10) return;
+
+        draggedSomething = true;
 
         target.style.left = newX - (targetW / 2)+ "px";
         target.style.top = newY - (targetH / 2)+ "px";
@@ -229,29 +240,35 @@ class App extends Component {
         var {startW, startH, scaleEndX, scaleEndY} = this.state;
 
         // If we haven't started dragging yet, setup initial values
-        if(dragStartX == null || dragStartY == null || scaleEndX == null || scaleEndY == null){
+        if(startX == null || startY == null || scaleEndX == null || scaleEndY == null){
           console.log("New scale values initialized");
-          dragStartX = e.pageX;
-          dragStartY = e.pageY;
+          startX = e.pageX;
+          startY = e.pageY;
+
 
           startW = target.offsetWidth;
           startH = target.offsetHeight;
 
-          scaleEndX = (dragStartX - startW);
-          scaleEndY = (dragStartY - startH);
+          scaleEndX = (startX - startW);
+          scaleEndY = (startY - startH);
 
           // dragStartX -= (startW / 2);
           // dragStartY -= (startH / 2);
           // scaleEndX -= (startW / 2);
           // scaleEndY -= (startH / 2);
 
-          this.setState({dragStartX: dragStartX, dragStartY: dragStartY, startW: startW, startH: startH, scaleEndX: scaleEndX, scaleEndY: scaleEndY});
+          this.setState({dragStart: {startX: startX, startY: startY, absoluteX: e.pageX, absoluteY: e.pageY}, startW: startW, startH: startH, scaleEndX: scaleEndX, scaleEndY: scaleEndY});
           return;
         }
         var difX = e.pageX - scaleEndX;
         var difY = e.pageY - scaleEndY;
         var percX = difX / this.state.startW;
         var percY = difY / this.state.startH;
+
+        var dif = Math.abs(e.pageX - absoluteStartX) + Math.abs(e.pageY - absoluteStartY);
+        if(dif < 10) return;
+
+        draggedSomething = true;
 
         target.style.width = this.state.startW * percX + "px";
         target.style.height = this.state.startH * percY + "px";
@@ -260,6 +277,8 @@ class App extends Component {
         //console.log(" Start H: " + this.state.startH +" perc X " + percX +" percY: " +percY +" height: " +target.style.height);
       }
 
+      if(draggedSomething && this.props.editorTarget)
+        this.props.setEditorTarget(null);
     }
   }
 
@@ -267,7 +286,7 @@ class App extends Component {
     if(this.props.editorTarget && this.isInsideEditor(e.pageX, e.pageY))
       mouseDownInsideEditor = true;
 
-    if(this.props.penType !== PEN_TYPE.EDIT) return;
+    //if(this.props.penType !== PEN_TYPE.EDIT) return;
 
     var target = document.elementFromPoint(e.pageX, e.pageY);
 
@@ -292,18 +311,20 @@ class App extends Component {
 
     target.style.cursor = "default";
     target.draggable = false
-    this.setState({dragTarget: target.id, dragging: true, dragStartX: null, dragStartY: null});
+    this.setState({dragTarget: target.id, dragging: true, dragStart: null});
   }
 
   onMouseUp = (e) =>{
     if(!e || !e.nativeEvent) return;
 
-    this.setState({dragging: false, dragTarget: null, scaleEndX: null, scaleEndY: null, startW: null, startH: null, dragStartX: null, dragStartY: null,});
+    this.setState({dragging: false, dragTarget: null, scaleEndX: null, scaleEndY: null, startW: null, startH: null, dragStart: null,});
   }
 
   handleClick = (e) =>{
-    if(this.props.penType === PEN_TYPE.EDIT)
+    if(draggedSomething){
+      draggedSomething = false;
       return;
+    }
 
     if(mouseDownInsideEditor || (this.props.editorTarget && this.isInsideEditor(e.pageX, e.pageY)) ){
       console.log("Clicked involved the editor");

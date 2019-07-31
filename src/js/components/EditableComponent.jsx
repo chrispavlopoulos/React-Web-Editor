@@ -74,6 +74,7 @@ class EditableComponent extends Component{
           style={{
             padding: "4vmin",
             display: "flex", alignItems: "center", justifyContent: "center",
+            width: "auto",
             position: "absolute",
             backgroundColor: "transparent",
             left: left, top: top}}>
@@ -105,7 +106,7 @@ class EditableComponent extends Component{
       <div ref={this.container} id={description.id} key={description.id}
       data-type={description.type} data-edit="true"
       style={{position: "absolute", display: "flex", alignItems: "none", justifyContent: "none",
-        backgroundColor: "transparent", left: left, top: top}}>
+        backgroundColor: "transparent",whiteSpace: "pre-wrap", left: left, top: top}}>
         {asset}
       </div>
     )

@@ -16,6 +16,7 @@ let needsInit = true;
 let windowResized = false;
 let lastKnownText = "";
 let isTyping = false;
+let willRealign = false;
 
 const mapStateToProps = state => {
   return {
@@ -83,8 +84,8 @@ class ConnectedEditorWindow extends Component{
     var editorWindow = this.editorWindow.current;
     var startLeft = window.innerWidth / 2;
     var startTop = window.innerHeight /2;
-    var editorWidth = vw(60);
-    var editorHeight = vw(25);
+    var editorWidth = vmin(60);
+    var editorHeight = vmin(25);
     if(editorWindow){
       startLeft -= editorWindow.offsetWidth / 2;
       startTop -= editorWindow.offsetTop / 2;
@@ -151,7 +152,19 @@ class ConnectedEditorWindow extends Component{
       if(target){
 
         this.attachToTarget(target);
-        this.alignWindowTo(target);
+
+        if(!this.state.editorTarget){
+          this.alignWindowTo(target);
+        }
+        else if(!willRealign){
+          willRealign = true;
+
+          setTimeout(() =>{
+            this.alignWindowTo(target);
+            willRealign = false;
+          }, 100)
+        }
+
       }
     }else{
       if(this.state.savedContent || this.state.editorSelectedProperty)
@@ -253,8 +266,9 @@ class ConnectedEditorWindow extends Component{
 
   onCancel = () => {
     var target = document.getElementById(this.props.editorTarget);
-    if(target){
-      this.setPropertyValueForTarget(target, this.props.editorSelectedProperty, this.state.savedContent);
+    var targetRef = this.props.editorTargetRef.current;
+    if(targetRef){
+      targetRef.setPropertyValue(this.props.editorSelectedProperty, this.state.savedContent);
     }
     this.setState({editorTarget: null, savedContent: null, waitForPropsToUpdate: true,});
     this.props.setEditorTarget(null);
@@ -276,9 +290,9 @@ class ConnectedEditorWindow extends Component{
 
       var defaultVal = Typ.getDefault(this.props.editorSelectedProperty.uniqueId);
       setTimeout(() => {
-        var target = document.getElementById(this.props.editorTarget);
-        if(target)
-          this.setPropertyValueForTarget(target, this.props.editorSelectedProperty, defaultVal);
+        var targetRef = this.props.editorTargetRef.current;
+        if(targetRef)
+          targetRef.setPropertyValue(this.props.editorSelectedProperty, defaultVal);
       }, 100)
 
     }else
@@ -395,7 +409,7 @@ class ConnectedEditorWindow extends Component{
             style={{width: "40%", height: "40%", filter: "invert(1) brightness(0.6) sepia(100%) saturate(300%) brightness(70%) hue-rotate(100deg)"}} />
           </div>
 
-          <div id="Close Button" title="Close" className="EditorHoverButton"
+          <div id="Cancel Button" title="Cancel" className="EditorHoverButton"
             onClick={this.onCancel}
             style={{
               position: "absolute",
@@ -531,120 +545,6 @@ class ConnectedEditorWindow extends Component{
 
   }
 
-  //  Helper function to GET the desired property for the current selection
-  //  i.e. <img> returns its src , <p> returns its textContent
-  getPropertyValueForTarget = (target, property, raw = false) =>{
-    var css = property.css;
-
-    var value = "";
-    if(!property || css === "default"){
-      switch (target.dataset.type) {
-        case ASSET_TYPE.TEXT:
-          value = target.textContent;
-        break;
-        case ASSET_TYPE.IMAGE:
-          value = target.src;
-        break;
-      }
-
-    }else{
-      if(property.isStyle)
-        value = target.style[css];
-      else
-        value = target[css];
-    }
-
-    return raw? value: this.parseFixes(value, property.prefix, property.postfix);
-  }
-  parseFixes = (value, prefix, postfix) =>{
-    var result = "";
-
-    //  If a prefix or posfix were given
-    if(prefix || postfix){
-      if(!prefix) prefix = '';
-      if(!postfix) postfix = '';
-
-      var prefixIndex, postfixIndex;
-      prefixIndex = postfixIndex = 0;
-      var foundPrefix, foundPostfix;
-      foundPrefix = foundPostfix = false;
-      var current = '';
-
-      for(var i = 0; i < value.length; i++){
-        //  Current letter in the raw value
-        current = value.charAt(i);
-
-        //  If we've concurrently seen every letter in the prefix, we've found it
-        if(prefixIndex >= prefix.length)
-          foundPrefix = true;
-
-        if(postfix && postfixIndex >= postfix.length)
-          break;
-
-        //  If we found the prefix and we haven't scanned over the postfix,
-        //  add the current letter to the result
-        if(foundPrefix){
-          if(current === postfix[postfixIndex])
-            postfixIndex++;
-
-          result += current;
-        }
-        //  If we haven't found the prefix:
-        //    If the current letter matches up with the prefix we're trying to find,
-        //      - Increase the prefixIndex to check for the next letter in the prefix
-        //    else
-        //      - We know this isn't the prefix, reset the index for the future
-        else{
-          if(current === prefix[prefixIndex])
-            prefixIndex++;
-          else
-            prefixIndex = 0;
-        }
-      }
-    }else
-      //  If there is no prefix or postfix, no need to scan
-      result = value;
-
-
-    //  We added the postfix when scanning so let's remove it, that's not what we want
-    if(result)
-      result = result.replace(postfix, '');
-
-    return result;
-  }
-  getBeforePrefix = (value, prefix) =>{
-    var foundPrefix, prefixIndex, result, current;
-    foundPrefix = false;
-    prefixIndex = 0;
-    result = current = '';
-
-    for(var i = 0; i < value.length; i++){
-      //  Current letter in the raw value
-      current = value.charAt(i);
-
-      //  If we've concurrently seen every letter in the prefix, we've found it
-      if(prefixIndex >= prefix.length)
-        foundPrefix = true;
-
-      if(foundPrefix)
-        break;
-
-      //  If we found the prefix and we haven't scanned over the postfix,
-      //  add the current letter to the result
-      result += current;
-      if(current === prefix[prefixIndex])
-        prefixIndex++;
-      else
-        prefixIndex = 0;
-    }
-
-    //  We added the prefix when scanning so let's remove it
-    if(result)
-      result = result.replace(prefix, '');
-
-    return result;
-  }
-
   //  Helper function to SET the desired property for the current selection
   //  i.e. <img>, src, cute.jpg -> img gets its src changed to cute.jpg,
   setPropertyValueForTarget = (target, property, newValue) =>{
@@ -696,11 +596,11 @@ class ConnectedEditorWindow extends Component{
     }
   }
 
-  //  Wanted to show the user that their input was actually applied to the element.
+  //  Wanted to show a user that their input was actually applied to the element.
   //
   //  A neat trick to check if a css property is valid is to just read from
   //  the elment after setting its value.
-  //  If its the same as the one you typed in, we darken the text
+  //  If it's the same as the one you typed in, we darken the text
   darkenIfValid = (target, property, newValue) =>{
     var setValue = this.getPropertyValueForTarget(target, property);
     if(newValue.charAt(0) === "#")

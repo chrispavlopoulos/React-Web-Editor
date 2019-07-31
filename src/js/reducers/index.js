@@ -10,7 +10,7 @@ const initialState = {
   editorProperties: [{}],
   editorSelectedProperty: null,
   drawerAssets: DataHelper.initDrawerAssets(),
-  assets: [{type: ASSET_TYPE.TEXT, id: ASSET_TYPE.TEXT + "0", content: "Hello Wrld", left: 100, top: 100, style: {color: "white"} }],
+  assets: [{type: ASSET_TYPE.TEXT, id: DataHelper.getUniqueAssetId(ASSET_TYPE.TEXT), content: "Hello Wrld", left: 100, top: 100, style: {color: "white"} }],
 };
 
 function rootReducer(state = initialState, action) {

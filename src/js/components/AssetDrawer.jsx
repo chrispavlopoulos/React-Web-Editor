@@ -63,7 +63,7 @@ class ConnectedAssetDrawer extends Component{
     var id = target.id.replace("dragger", '');
     console.log("Pushing asset: " +id +" at position: " +targetRect.left +" " +targetRect.top);
 
-    var packagedAsset = DataHelper.packageAsset(target, id + this.props.assets.length);
+    var packagedAsset = DataHelper.packageAsset(target, id);
 
     this.props.addAsset(packagedAsset);
     this.setState({dragger: null});
