@@ -206,7 +206,7 @@ class Typ{
       case 'scale':
         return '1';
       case "densitynumber":
-        return "5vmin";
+        return "4vmin";
       default:
         return '';
         break;
@@ -228,7 +228,7 @@ class Typ{
       case "scale":
         return ['1', '2', '5', '10', '1.5'];
       case "densitynumber":
-        return ["12px", "24px", "32px", "5vmin", "5vmax",];
+        return ["12px", "24px", "32px", "3vmin", "5vmin", "3vmax", "5vmax",];
       case "rotation":
         return ['45', '90', '180', '270'];
       case "textalign":

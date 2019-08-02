@@ -55,6 +55,9 @@ class App extends Component {
   }
 
   componentDidMount(){
+    window.addEventListener("keydown", this.handleKeyDown, true);
+    window.addEventListener("keyup", this.handleKeyUp, true);
+
     this.selectedAsset = React.createRef();
   }
 
@@ -189,17 +192,16 @@ class App extends Component {
       absoluteStartX = this.state.dragStart.absoluteX;
       absoluteStartY = this.state.dragStart.absoluteY;
     }
+
+    // Dragging or scaling something
     if(this.state.dragging){
-      var target = document.getElementById(this.state.dragTarget);
       var targetRef = this.selectedAsset.current;
-      if(!target)
-        return;
+      if(!targetRef)
+      return;
 
-      var child = document.getElementById(target.id + "AssetGroup");
+      var target = targetRef.container.current;
 
-
-      if(!target) return;
-
+      //var child = document.getElementById(target.id + "AssetGroup");
 
       if(!this.state.shiftDown){
         // Dragging
@@ -234,8 +236,7 @@ class App extends Component {
       }else{
         // Scaling
 
-        if(child)
-          target = child;
+        target = targetRef.getAssetDOM();
 
         var {startW, startH, scaleEndX, scaleEndY} = this.state;
 
@@ -427,8 +428,6 @@ class App extends Component {
 
     return(
       <div className="App" tabIndex="0"
-        onKeyDown={this.handleKeyDown}
-        onKeyUp={this.handleKeyUp}
         onClick={this.handleClick}
         onMouseMove={this.trackMouse}
         onMouseDown={this.onMouseDown}

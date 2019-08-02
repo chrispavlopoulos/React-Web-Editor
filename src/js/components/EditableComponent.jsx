@@ -35,13 +35,15 @@ class EditableComponent extends Component{
     var groupID = description.id + "AssetGroup";
     var left = description.left;
     var top = description.top;
+    var commonStyles = {position: "relative", margin: 0,}
 
     let asset;
     switch (description.type){
       case ASSET_TYPE.TEXT:
         asset =
         <p ref={this.asset} id={groupID} key={groupID}
-          style={{...description.style, margin: 0, fontSize: "4vmin"}}>{description.content}
+          style={{...description.style, ...commonStyles, fontSize: "4vmin"}}>
+          {description.content}
         </p>;
         break;
       case ASSET_TYPE.IMAGE:
@@ -49,13 +51,13 @@ class EditableComponent extends Component{
         <img  ref={this.asset} id={groupID} key={groupID}
           data-type={description.type} data-edit="true"
           src={description.content}
-          style={{ ...description.style, width: "12vmin", height: "12vmin", margin: 0}}
+          style={{ ...description.style, ...commonStyles, width: "12vmin", height: "12vmin",}}
         />;
         break;
       case ASSET_TYPE.VIDEO:
       asset =
         <div ref={this.asset} id={groupID} key={groupID}
-          style={{
+          style={{ ...commonStyles,
             width: "30vmin", height: "26vmin",
             display: "flex", alignItems: "center", justifyContent: "center",
             backgroundColor: "transparent",}}>
@@ -72,12 +74,11 @@ class EditableComponent extends Component{
         <div id={groupID} key={groupID}
           data-type={description.type} data-edit="true"
           style={{
+            ...commonStyles,
             padding: "4vmin",
             display: "flex", alignItems: "center", justifyContent: "center",
-            width: "auto",
-            position: "absolute",
-            backgroundColor: "transparent",
-            left: left, top: top}}>
+            width: "100%",
+            backgroundColor: "transparent",}}>
 
             <MaterialInput ref={this.asset} description={description} style={{ }}/>
           {/*
@@ -105,17 +106,24 @@ class EditableComponent extends Component{
     return (
       <div ref={this.container} id={description.id} key={description.id}
       data-type={description.type} data-edit="true"
-      style={{position: "absolute", display: "flex", alignItems: "none", justifyContent: "none",
-        backgroundColor: "transparent",whiteSpace: "pre-wrap", left: left, top: top}}>
+      style={{position: "absolute",
+        backgroundColor: "transparent", left: left, top: top,}}>
         {asset}
       </div>
     )
   }
 
+  getAssetDOM = () =>{
+    if(this.isDOMElement(this.asset.current))
+      return this.asset.current;
+    else
+      return this.asset.current.getAssetDOM();
+  }
+
   getWidth = () =>{
     var container = this.container.current, asset = this.container.current.children[0];
-
-    return container.offsetWidth? container.offsetWidth
+    var containerRect = container.getBoundingClientRect();
+    return containerRect? containerRect.width
     : container.style.width? container.style.width
     : asset.offsetWidth? asset.offsetWidth
     : asset.style.width? asset.style.width
@@ -125,7 +133,7 @@ class EditableComponent extends Component{
   getHeight = () =>{
     var container = this.container.current, asset = this.container.current.children[0];
 
-    return container.offsetHeight? container.offsetHeight
+    return container.getBoundingClientRect()? container.getBoundingClientRect().height
     : container.style.height? container.style.height
     : asset.offsetHeight? asset.offsetHeight
     : asset.style.height? asset.style.height
@@ -333,6 +341,11 @@ class EditableComponent extends Component{
       result = result.replace(prefix, '');
 
     return result;
+  }
+
+
+  isDOMElement = (element) =>{
+    return element instanceof Element || element instanceof HTMLDocument;  
   }
 
 }

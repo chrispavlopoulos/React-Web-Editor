@@ -23,7 +23,7 @@ class ConnectedPen extends Component{
 
   state = {
     hoverTarget: null,
-    open: true,
+    open: false,
     marginRight: 0,
     vWidth: 0,
     vHeight: 0,

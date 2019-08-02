@@ -39,8 +39,11 @@ class ConnectedAssetDrawer extends Component{
   startDrag = (e) =>{
     var target = document.elementFromPoint(e.pageX, e.pageY);
     if(!target) return;
+    
     var assetID = target.id.replace('parent', '');
     target = document.getElementById(assetID);
+    if(!target) return;
+
     this.setState({dragger: target.id + "dragger"});
 
     console.log("Dragging: " +target.id);

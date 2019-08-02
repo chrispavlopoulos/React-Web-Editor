@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import '../../InputBox.css';
 
 const CoolInput = styled.input`
+  width:100%;
   color: ${props => props.inputColor || (props.backgroundColor && "black") || "white"};
   background: ${props => props.backgroundColor || "transparent"};
   font-size:18px;
@@ -34,22 +35,20 @@ const CoolLabel = styled.label`
 `;
 
 const HighlightBarIn = styled.span`
-  height:2px;
-  width:0;
-  bottom:0px;
-  position:absolute;
   width:0%;
+  height:2px;
+  top:2.5em;
+  position:absolute;
   background-color: ${props => props.color || "#5264AE"};
   transition:0.2s ease all;
 `;
 
 const HighlightBarOut = styled.span`
+  width:100%;
   height:2px;
-  width:0;
-  bottom:0px;
+  top:2.5em;
   right:0px;
   position:absolute;
-  width:100%;
   background-color: ${props => props.color || "white"};
   transition:0.2s ease all;
 `;
@@ -127,6 +126,10 @@ class MaterialInput extends Component{
     )
   }
 
+  getAssetDOM = () =>{
+    return this.wrapper.current;
+  }
+
   //  Helper function to GET the desired property for the current selection
   //  i.e. <img> returns its src , <p> returns its textContent
   getPropertyValue = (property, raw = false) =>{
@@ -141,25 +144,25 @@ class MaterialInput extends Component{
       switch(property.uniqueId.toUpperCase()){
         case "INPUTTYPE":
           value = this.state.type;
-          return;
+          break;
         case "TITLE":
           target = this.label.current;
-          return;
+          break;
         case "TITLECOLOR":
           value = this.state.titleColor;
-          return;
+          break;
         case "INPUTCOLOR":
           value = this.state.inputColor;
-          return;
+          break;
         case "UNDERLINECOLOR":
           value = this.state.underlineColor;
-          return;
+          break;
         case "SECONDARYCOLOR":
           value = this.state.secondaryColor;
-          return;
+          break;
         case "BACKGROUNDCOLOR":
           value = this.state.backgroundColor;
-          return;
+          break;
         default:
           target = this.wrapper.current;
 
