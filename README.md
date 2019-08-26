@@ -6,9 +6,26 @@ Its function is to help an individual with no programming knowledge build their 
 My goal with starting this project was to better familarize myself with the powerhouse, **Javascript** and a few of its popular libraries such as **React** and **Redux**.
 
 ## Examples
-<img src="git images/Startup.png" width="639" height="341" />
-<img src="git images/EditorOpen.png" width="639" height="341" />
-<img src="git images/TextColorChange.png" width="639" height="341" />
 
-##### *Nothing too exciting, but here is an example of something one could make using only the Web App.*
-<img src="git images/WebsiteSample.png" width="639" height="341" />
+###### *The default layout gives the user a "hello wrld" text box on an otherwise blank slate.*
+<div>
+  <img src="git images/Startup.png" width="639" height="341" />
+</div>
+
+
+###### *When a component is clicked, the editor opens showing several properties of the item you're viewing.*
+<div>
+  <img src="git images/EditorOpen.png" width="639" height="341" />
+</div>
+
+
+###### *The editor has many useful features such as a history of your past inputs and suggestions for common properties given the attribute with everything being contextual to the type of object and the attribute you've selected.*
+<div>
+  <img src="git images/TextColorChange.png" width="639" height="341" />
+</div>
+
+
+###### *Nothing too exciting, but here is an example of something one could make using only the Web App.*
+<div>
+    <img src="git images/WebsiteSample.png" width="639" height="341" />
+</div>
