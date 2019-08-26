@@ -12,18 +12,21 @@ My goal with starting this project was to better familarize myself with the powe
   <img src="git images/Startup.png" width="639" height="341" />
 </div>
 
+</br>
 
 ###### *When a component is clicked, the editor opens showing several properties of the item you're viewing.*
 <div>
   <img src="git images/EditorOpen.png" width="639" height="341" />
 </div>
 
+</br>
 
 ###### *The editor has many useful features such as a history of your past inputs and suggestions for common properties given the attribute with everything being contextual to the type of object and the attribute you've selected.*
 <div>
   <img src="git images/TextColorChange.png" width="639" height="341" />
 </div>
 
+</br>
 
 ###### *Nothing too exciting, but here is an example of something one could make using only the Web App.*
 <div>
