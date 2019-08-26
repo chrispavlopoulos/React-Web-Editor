@@ -10,6 +10,10 @@
   overflow-y: hidden;
 }
 
+:focus {
+  outline: none !important;
+}
+
 html {
   overflow-x: hidden;
   overflow-y: hidden;
@@ -18,6 +22,7 @@ body{
   overflow-x: hidden;
   overflow-y: hidden;
 }
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -41,6 +46,12 @@ input:-webkit-autofill:active {
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .App-link {
@@ -96,6 +107,7 @@ input:-webkit-autofill:active {
   -webkit-user-select: none; /* Chrome/Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+ */
+
 }
 
 .Pens{
