@@ -126,7 +126,7 @@ input:-webkit-autofill:active {
 
 .Pen-Arrow{
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
-  transition: text-shados 0.2s ease-in-out;
+  transition: text-shadow 0.2s ease-in-out;
 }
 
 .Pen-Arrow:hover{
